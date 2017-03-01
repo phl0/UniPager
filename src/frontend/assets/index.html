@@ -114,6 +114,13 @@
                          v-model="config.audio.inverted">
               </div>
             </div>
+            <div class="form-group">
+              <label for="audio-ptt-type">PTT Type</label>
+              <select id="audio-ptt-type" v-model="config.audio.ptt_type">
+                <option>GPIO</option>
+                <option>RS-232</option>
+              </select>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="audio-ptt-pin">PTT Pin</label>

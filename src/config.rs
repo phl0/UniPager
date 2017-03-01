@@ -52,6 +52,7 @@ impl Default for STM32PagerConfig {
 pub struct AudioConfig {
     pub level: u8,
     pub inverted: bool,
+    pub ptt_type: String,
     pub ptt_pin: usize,
     #[serde(default)]
     pub tx_delay: usize
@@ -62,6 +63,7 @@ impl Default for AudioConfig {
         AudioConfig {
             level: 127,
             inverted: false,
+            ptt_type: String::from("GPIO"),
             ptt_pin: 0,
             tx_delay: 0
         }
