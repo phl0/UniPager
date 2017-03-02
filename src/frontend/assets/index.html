@@ -121,19 +121,24 @@
                 <option>RS-232</option>
               </select>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="audio-ptt-pin">PTT Pin</label>
-                <input type="number" id="audio-ptt-pin"
-                       v-model="config.audio.ptt_pin"
-                       step="1" min="0" number class="u8-number">
-              </div>
               <div class="form-group">
                   <label for="audio-tx-delay">TX Delay (ms)</label>
                   <input type="number" id="audio-tx-delay"
                          v-model="config.audio.tx_delay"
                          step="1" min="0" max="100" number
                          class="u8-number">
+              </div>
+            <div class="form-row">
+              <div class="form-group" v-if="config.audio.ptt_type == 'GPIO'">
+                <label for="audio-ptt-pin">PTT Pin</label>
+                <input type="number" id="audio-ptt-pin"
+                       v-model="config.audio.ptt_pin"
+                       step="1" min="0" number class="u8-number">
+              </div>
+              <div class="form-group" v-if="config.audio.ptt_type == 'RS-232'">
+                <label for="audio-ptt-port">Serial Port</label>
+                <input type="text" id="audio-ptt-port"
+                       v-model="config.audio.ptt_port">
               </div>
             </div>
           </div>

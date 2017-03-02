@@ -54,6 +54,7 @@ pub struct AudioConfig {
     pub inverted: bool,
     pub ptt_type: String,
     pub ptt_pin: usize,
+    pub ptt_port: String,
     #[serde(default)]
     pub tx_delay: usize
 }
@@ -65,6 +66,7 @@ impl Default for AudioConfig {
             inverted: false,
             ptt_type: String::from("GPIO"),
             ptt_pin: 0,
+            ptt_port: String::from("/dev/ttyUSB0"),
             tx_delay: 0
         }
     }
