@@ -13,7 +13,9 @@ const SAMPLE_RATE: usize = 48000;
 const SAMPLES_PER_BIT: usize = SAMPLE_RATE/BAUD_RATE;
 
 pub struct AudioTransmitter {
+    ptt_type: String,
     ptt_pin: Pin,
+    ptt_port: String,
     inverted: bool,
     level: u8,
     tx_delay: usize
@@ -27,7 +29,9 @@ impl AudioTransmitter {
         let gpio = Gpio::new().expect("Failed to map GPIO");
 
         let mut transmitter = AudioTransmitter {
+            ptt_type: config.audio.ptt_type.to_owned(),
             ptt_pin: gpio.pin(config.audio.ptt_pin, Direction::Output),
+            ptt_port: config.audio.ptt_port.to_owned(),
             inverted: config.audio.inverted,
             level: config.audio.level,
             tx_delay: config.audio.tx_delay
