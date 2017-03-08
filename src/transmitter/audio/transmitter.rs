@@ -2,7 +2,8 @@ use std::process::{Command, Stdio};
 use std::io::Write;
 use std::thread::sleep;
 use std::time::Duration;
-use raspi::{Gpio, Pin, Direction, Model};
+// use raspi::{Gpio, Pin, Direction, Model};
+use serial::{self, SerialPort};
 
 use pocsag::Generator;
 use config::Config;
@@ -15,19 +16,39 @@ const SAMPLES_PER_BIT: usize = SAMPLE_RATE/BAUD_RATE;
 pub struct AudioTransmitter {
     device: String,
     ptt_type: String,
-    ptt_pin: Pin,
+    // ptt_pin: Pin,
     ptt_port: String,
     inverted: bool,
     level: u8,
-    tx_delay: usize
+    tx_delay: usize,
+    serial: Box<serial::SerialPort>
 }
 
 impl AudioTransmitter {
     pub fn new(config: &Config) -> AudioTransmitter {
         info!("Initializing audio transmitter...");
-        info!("Detected {}", Model::get());
+        // info!("Detected {}", Model::get());
+        let ptt_type = &config.audio.ptt_type;
+        info!("PTT type: {:?}", ptt_type);
 
-        let gpio = Gpio::new().expect("Failed to map GPIO");
+        let ptt_port = &config.audio.ptt_port;
+        info!("Initializing serial port {:?}", ptt_port);
+        let mut serial = serial::open(&config.audio.ptt_port)
+            .expect("Unable to open serial port");
+
+//        serial.configure(&serial::PortSettings {
+//            baud_rate: serial::BaudRate::Baud38400,
+//            char_size: serial::CharSize::Bits8,
+//            parity: serial::Parity::ParityNone,
+//            stop_bits: serial::StopBits::Stop1,
+//            flow_control: serial::FlowControl::FlowNone
+//        }).expect("Unable to configure serial port");
+
+        // info!("Set DTR false");
+        // serial.set_dtr(false)
+            // .expect("Error");
+
+        // let gpio = Gpio::new().expect("Failed to map GPIO");
 
         let device = match &*config.audio.device {
             "" => String::from("default"),
@@ -37,18 +58,21 @@ impl AudioTransmitter {
         let mut transmitter = AudioTransmitter {
             device: device,
             ptt_type: config.audio.ptt_type.to_owned(),
-            ptt_pin: gpio.pin(config.audio.ptt_pin, Direction::Output),
+            //ptt_pin: gpio.pin(config.audio.ptt_pin, Direction::Output),
             ptt_port: config.audio.ptt_port.to_owned(),
             inverted: config.audio.inverted,
             level: config.audio.level,
-            tx_delay: config.audio.tx_delay
+            tx_delay: config.audio.tx_delay,
+            serial: Box::new(serial)
         };
 
         if transmitter.level > 127 {
             transmitter.level = 127;
         }
 
-       transmitter.ptt_pin.set_low();
+       //transmitter.ptt_pin.set_low();
+       transmitter.serial.set_dtr(true)
+           .expect("Error setting PTT pin");
 
        transmitter
     }
@@ -56,7 +80,9 @@ impl AudioTransmitter {
 
 impl Transmitter for AudioTransmitter {
     fn send(&mut self, gen: Generator) {
-        self.ptt_pin.set_high();
+        //self.ptt_pin.set_high();
+        self.serial.set_dtr(false)
+           .expect("Error setting PTT pin");
 
         sleep(Duration::from_millis(self.tx_delay as u64));
 
@@ -91,6 +117,8 @@ impl Transmitter for AudioTransmitter {
 
         child.wait().expect("Failed to wait for aplay");
 
-        self.ptt_pin.set_low();
+        //self.ptt_pin.set_low();
+        self.serial.set_dtr(true)
+           .expect("Error setting PTT pin");
     }
 }
