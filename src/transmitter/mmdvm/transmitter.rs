@@ -3,11 +3,14 @@ const MMDVM_GET_VERSION: u8 = 0x00;
 const MMDVM_SET_CONFIG:  u8 = 0x02;
 const MODE_IDLE:         u8 = 0x00;
 
+const BUFFER_LENGTH:     usize = 2000;
+
 use serial::{self, SerialPort};
 
 use config::Config;
 use transmitter::Transmitter;
-use std::io::{Write};
+use std::io::{Read,Write};
+use std::str;
 
 pub struct MMDVMTransmitter {
     serial: Box<serial::SerialPort>
@@ -48,8 +51,64 @@ impl MMDVMTransmitter {
             3 as u8,
             MMDVM_GET_VERSION as u8,
         ];
+        let mut buffer = [0; BUFFER_LENGTH];
+        let mut length = 0;
+        let mut payload = 0 as u16;
         if serial.write_all(&bytes).is_err() {
             error!("Unable to intialize MMDVM!");
+        }
+
+        let mut offset = 0;
+        if !serial.read(&mut buffer[..]).is_err() {
+            // println!("Curr {:?}", buffer[0]);
+            if offset == 0 {
+                let ret = buffer[offset];
+                if ret < 0 {
+                    error!("Error when reading from the modem");
+                }
+                if ret == 0 {
+                    error!("Timeout");
+                }
+                if ret != MMDVM_FRAME_START {
+                    error!("Timeout");
+                } else {
+                    // println!("MMDVM Frame Start found");
+                }
+                offset = 1;
+            }
+            if offset == 1 {
+                // Get the length of the frame
+                length = buffer[offset];
+                // println!("Frame length: {} bytes", length);
+                offset = 2;
+            }
+            if offset == 2 {
+                // Get the frame type
+                let ret = buffer[offset];
+                if ret < 0 {
+                    offset = 0;
+                    error!("Error when reading from the modem");
+                }
+                if ret == MMDVM_GET_VERSION {
+                    // println!("Frame type: {}", ret);
+                }
+                offset = 4;
+            }
+            let mut version = String::from("MMDVM protocol version: ");
+            // version.push((buffer[3] + 30) as char);
+            version.push_str(&format!("{}", buffer[3]));
+            version.push_str(", description: ");
+            if offset >= 4 {
+                while offset < length.into() {
+                    // info!("{}", buffer[offset] as char);
+                    version.push(buffer[offset] as char);
+                    offset += 1;
+                }
+            }
+            info!("{}", version);
+
+        } else {
+            error!("Error when reading from the modem");
         }
 
         let bytes = [
