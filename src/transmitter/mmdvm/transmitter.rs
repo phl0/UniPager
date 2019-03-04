@@ -49,12 +49,13 @@ impl MMDVMTransmitter {
         if !self.serial.read(&mut buffer[..]).is_err() {
             match &buffer[0..4] {
               [MMDVM_FRAME_START, length, MMDVM_GET_VERSION, version] => {
-                info!("Received version {:?} length {:?}", version, length);
+                info!("MMDVM protocol version: {:?}", version);
+                info!("Description: {}", std::str::from_utf8(&buffer[4..*length as usize]).unwrap_or("Failed to convert"));
               },
-              _ => warn!("Unknown frame received")
+              _ => warn!("Error detecting MMDVM version")
             }
         } else {
-            error!("Error when reading from the modem");
+            error!("Error when reading version info from the modem");
         }
 
         self.send_cmd(MMDVM_SET_CONFIG, &[
