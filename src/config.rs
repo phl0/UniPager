@@ -92,7 +92,8 @@ pub struct AudioConfig {
 pub struct MMDVMConfig {
     pub port: String,
     pub inverted: bool,
-    pub level: f32
+    pub level: f32,
+    pub freq: u32
 }
 
 impl Default for MMDVMConfig {
@@ -100,7 +101,8 @@ impl Default for MMDVMConfig {
         MMDVMConfig {
             port: String::from("/dev/ttyUSB0"),
             inverted: false,
-            level: 50.0
+            level: 50.0,
+            freq: 439987500
         }
     }
 }

@@ -39,6 +39,7 @@ impl MMDVMTransmitter {
     pub fn init(&mut self, config: &Config) {
         let inverted = config.mmdvm.inverted;
         let mut level = config.mmdvm.level;
+        let freq = config.mmdvm.freq;
 
         level = if level > 100.0 { 100.0 } else { level };
         level *= 2.55 + 0.5;
@@ -99,16 +100,20 @@ impl MMDVMTransmitter {
 
         self.read_result();
 
+        info!("Set TX frequency: {:?} Hz", freq);
         self.send_cmd(MMDVM_SET_FREQ, &[
             0x0,
-            // freq_rx
+            // freq_rx (not used)
             0x2C, 0xAD, 0x39, 0x1A,
-            // freq_tx
+            // freq_tx (not used)
             0x2C, 0xAD, 0x39, 0x1A,
             // rf_power,
             0xFF,
             // pocsag_freq_tx
-            0x2C, 0xAD, 0x39, 0x1A,
+            freq.to_le_bytes()[0],
+            freq.to_le_bytes()[1],
+            freq.to_le_bytes()[2],
+            freq.to_le_bytes()[3],
         ]);
 
         self.read_result();

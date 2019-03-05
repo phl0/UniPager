@@ -262,6 +262,11 @@
                     v-model="config.mmdvm.inverted">
                 </div>
               </div>
+              <div class="form-group">
+                <label for="mmdvm-freq">Frequency (Hz)</label>
+                <input type="number" id="mmdvm-freq"
+                  v-model.number="config.mmdvm.freq" class="u32-number">
+              </div>
             </div>
           </div>
 
