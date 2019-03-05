@@ -6,7 +6,7 @@ const MMDVM_SET_FREQ:    u8 = 0x04;
 const MMDVM_POCSAG_DATA: u8 = 0x50;
 const MMDVM_MODE_IDLE:   u8 = 0x00;
 const MMDVM_ACK:         u8 = 0x70;
-const MMDVM_NACK:        u8 = 0x7F;
+const MMDVM_NAK:         u8 = 0x7F;
 const BUFFER_LENGTH:     usize = 2000;
 
 use config::Config;
@@ -159,8 +159,8 @@ impl MMDVMTransmitter {
                     info!("Received ACK ({:?})", ftype);
                     Ok(*ftype)
                 }
-                [MMDVM_FRAME_START, _, MMDVM_NACK, ftype] => {
-                    warn!("Received NACK ({:?}): {:?}", ftype, buffer.get(4));
+                [MMDVM_FRAME_START, _, MMDVM_NAK, ftype] => {
+                    warn!("Received NAK ({:?}): {:?}", ftype, buffer.get(4));
                     if let Some(err) = buffer.get(4) {
                         Err(Some(*err))
                     }
