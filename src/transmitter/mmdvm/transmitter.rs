@@ -38,11 +38,11 @@ impl MMDVMTransmitter {
 
     pub fn init(&mut self, config: &Config) {
         let inverted = config.mmdvm.inverted;
-        let mut level = config.mmdvm.level;
+        let mut rflevel = config.mmdvm.rflevel;
         let freq = config.mmdvm.freq;
 
-        level = if level > 100.0 { 100.0 } else { level };
-        level *= 2.55 + 0.5;
+        rflevel = if rflevel > 100.0 { 100.0 } else { rflevel };
+        rflevel *= 2.55 + 0.5;
 
         self.send_cmd(MMDVM_GET_VERSION, &[]);
 
@@ -94,8 +94,8 @@ impl MMDVMTransmitter {
             0,
             // YSF TX hang time (not needed)
             0,
-            // POCSAG TX level
-            level as u8
+            // POCSAG TX level (deviation)
+            50
         ]);
 
         self.read_result();
@@ -108,7 +108,7 @@ impl MMDVMTransmitter {
             // freq_tx (not used)
             0x2C, 0xAD, 0x39, 0x1A,
             // rf_power,
-            0xFF,
+            rflevel as u8,
             // pocsag_freq_tx
             freq.to_le_bytes()[0],
             freq.to_le_bytes()[1],
