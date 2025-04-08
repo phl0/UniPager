@@ -95,10 +95,6 @@ impl TimeSlots {
         self.0.get(slot.index()).cloned().unwrap_or(false)
     }
 
-    pub fn is_current_allowed(&self) -> bool {
-        self.is_allowed(TimeSlot::current())
-    }
-
     pub fn next_allowed(&self) -> Option<TimeSlot> {
         let current = TimeSlot::current().index();
         let iterator = self.0.iter().enumerate().cycle().skip(current);

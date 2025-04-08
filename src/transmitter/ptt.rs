@@ -4,13 +4,13 @@ use serial;
 use std::ffi::CString;
 
 pub enum Ptt {
-    Gpio { pin: Box<Pin>, inverted: bool },
+    Gpio { pin: Box<dyn Pin>, inverted: bool },
     SerialDtr {
-        port: Box<serial::SerialPort>,
+        port: Box<dyn serial::SerialPort>,
         inverted: bool
     },
     SerialRts {
-        port: Box<serial::SerialPort>,
+        port: Box<dyn serial::SerialPort>,
         inverted: bool
     },
     HidRaw {
@@ -62,7 +62,7 @@ impl Ptt {
                 let path = CString::new(&*config.hidraw_device).unwrap();
                 for device in api.devices() {
                     if device.path == path {
-                        if device.vendor_id == 0x0d8c && (device.product_id == 0x013c || device.product_id == 0x000c) {
+                        if device.vendor_id == 0x0d8c && (device.product_id == 0x013c || device.product_id == 0x000c || device.product_id == 0x0012) {
                             info!("Found CM108 device {:#06x}/{:#06x}", device.vendor_id, device.product_id);
                         } else {
                             error!("Unsupported device {:#06x}/{:#06x}!", device.vendor_id, device.product_id);

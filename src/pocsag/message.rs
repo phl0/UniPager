@@ -28,13 +28,6 @@ pub struct Message {
     pub data: String
 }
 
-impl Message {
-    pub fn size(&self) -> usize {
-        // TODO: Calculate worst case size
-        self.data.len()
-    }
-}
-
 impl Default for Message {
     fn default() -> Message {
         Message {

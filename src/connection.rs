@@ -5,6 +5,8 @@ use std::sync::mpsc::{Sender, channel};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration};
 
+use crossbeam_channel::{select, unbounded};
+
 use config::Config;
 use pocsag::{Message, MessageFunc, MessageSpeed, MessageType};
 use pocsag::{Scheduler, TimeSlots};
@@ -100,15 +102,15 @@ impl Connection {
 
                     let stream = connection.stream.try_clone().unwrap();
 
-                    let (stopped_tx, stopped_rx) = channel();
+                    let (stopped_tx, stopped_rx) = unbounded();
                     let handle = thread::spawn(move || {
                         connection.run().ok();
                         stopped_tx.send(()).unwrap();
                     });
 
                     select! {
-                        _ = stopped_rx.recv() => reconnect = true,
-                        _ = stop_rx.recv() => reconnect = false
+                        recv(stopped_rx) -> _msg => reconnect = true,
+                        recv(stopped_rx) -> _msg => reconnect = false,
                     }
 
                     stream.shutdown(Shutdown::Both).ok();

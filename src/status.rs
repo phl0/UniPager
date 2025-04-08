@@ -67,18 +67,6 @@ macro_rules! status {
     });
 }
 
-macro_rules! status_silent {
-    ( $( $key:ident: $value:expr),* ) => ({
-        let mut status = $crate::status::STATUS.write().unwrap();
-        $(
-            // Update only if the value has changed
-            if status.$key != $value {
-                status.$key = $value;
-            }
-        )*
-    });
-}
-
 macro_rules! status_inc {
     ( $( $key:ident: $value:expr),* ) => ({
         let mut status = $crate::status::STATUS.write().unwrap();

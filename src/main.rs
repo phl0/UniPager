@@ -1,4 +1,3 @@
-#![feature(mpsc_select)]
 extern crate serial;
 extern crate raspi;
 extern crate ws;
@@ -13,6 +12,7 @@ extern crate serde_json;
 extern crate log;
 #[macro_use]
 extern crate lazy_static;
+extern crate crossbeam_channel;
 
 #[macro_use]
 mod status;
